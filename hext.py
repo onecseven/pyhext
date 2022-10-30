@@ -5,6 +5,7 @@ import numpy as np
 import colorsys, os
 from slope import write_sorted
 from utils import text2file
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 def extract_text(crop, img_thresh):
     result = []
@@ -15,10 +16,17 @@ def extract_text(crop, img_thresh):
     result.reverse()
     return result
 
-def treat_img(input):
+def show(img):
+    while (1):
+        cv2.imshow('image', img)
+        if cv2.waitKey(33) & 0xFF == ord('q'):
+            break
+
+
+def treat_img(input, grayscale):
     img_src = cv2.imread(input)
     (img_thresh, img_gray) = threshold_image(img_src)
-    (img_mask, img_hsv) = mask_image(img_src)
+    (img_mask, img_hsv) = mask_image(img_src, grayscale)
     
     if is_empty_mask(img_mask):
         return [], []
@@ -46,25 +54,34 @@ def is_empty_mask(img_mask):
                 pass
     return True
 
-def mask_image(img_src):
+def mask_image(img_src, grayscale):
     # RGB to HSV color space conversion
     img_hsv = cv2.cvtColor(img_src, cv2.COLOR_BGR2HSV)
-    upper = np.array([179, 255, 255])
-    lower = np.array([0, 107, 0])
-    
+
+    if grayscale:
+        #upper = np.array([62,3,210])
+        #lower = np.array([51,0,205])
+        upper = np.array([62, 0,210])
+        lower = np.array([0,0,207])
+        str = 1
+    else:
+        upper = np.array([179, 255, 255])
+        lower = np.array([0, 107, 0])
+        str = 3
+    #gray
     # Color segmentation with lower and upper threshold ranges to obtain a binary image
     img_mask = cv2.inRange(img_hsv, lower, upper)
 
     
-    img_mask_denoised = denoise_image(img_mask)
+    img_mask_denoised = denoise_image(img_mask, str)
     
     return img_mask_denoised, img_hsv
 
-def denoise_image(img_mask):
+def denoise_image(img_mask, str):
     """Denoise image with a morphological transformation."""
 
     # Morphological transformations to remove small noise
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (str, str))
     img_denoised = cv2.morphologyEx(
         img_mask, cv2.MORPH_OPEN, kernel, iterations=1)
 
@@ -105,10 +122,10 @@ def draw_contour_boundings(img_src, img_mask, threshold_area=400):
         cv2.rectangle(img_box, (x, y), (x + w, y + h), (255, 0, 0), 2, cv2.LINE_AA, 0)
     return img_contour, img_box, crop
 
-def process(png_path, input, png):
+def process(png_path, input, png, png_folder, grayscale):
     if os.path.isfile(png_path):
-        (crop, img_thresh) = treat_img(png_path)
+        (crop, img_thresh) = treat_img(png_path, grayscale)
         text = extract_text(crop, img_thresh)
-        text2file(text, input, png)
+        text2file(text, input, png, png_folder)
     os.remove(png_path) 
 

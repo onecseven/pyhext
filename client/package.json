@@ -1,0 +1,22 @@
+{
+  "name": "pyhext-client",
+  "version": "0.0.1",
+  "description": "GUI for pyhext",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js"
+  },
+  "author": "github.com/onecseven",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "uuid": "^8.3.1",
+    "ws": "^7.3.1"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.11.0"
+  }
+}
