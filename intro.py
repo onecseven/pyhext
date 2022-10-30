@@ -13,16 +13,16 @@ import sys, os
 def main():
 
     input = sys.argv[1]
-
+    grayscale = False
+    if sys.argv.__len__() > 2 and sys.argv[2] == "gray":
+        grayscale = True
     png_folder = pdf2png(input)
-    # Do stuff...
     for png in progress_bar(os.listdir(png_folder), prefix = 'Progress:', suffix = 'Complete', length = 50):
         if not png.endswith(".png"):
             continue
         png_path = os.path.join(png_folder, png)
-        #print("Working on %s" % filename(png_path))
-        process(png_path, input, png)
-    write_sorted(input)
+        process(png_path, input, png, png_folder, grayscale)
+    write_sorted(png_folder)
     print("OK")
 
 

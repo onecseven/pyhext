@@ -75,16 +75,16 @@ def pdf2png(pdf_path):
     """
     doc = fitz.open(pdf_path)  # open document
     fil = filename(pdf_path)
-    result_folder_path = pathlib.Path(".\%s" % fil)
+    folderpath = pdf_path.__str__()[0:(pdf_path.__str__().rfind("\\") + 1)]
+    result_folder_path = folderpath+fil+"\\"
     try:
-        os.makedirs(fil, exist_ok=False)
-    except FileExistsError:
-        return result_folder_path
-
+        os.makedirs(result_folder_path, exist_ok=True)
+    except:
+        raise Exception("Couldn't make dirs")
     for page in doc:  # iterate through the pages
-        # print("Creating .\%s\page-%i.png" % (fil, page.number))
+        #print("Creating %s\page-%i.png" % (result_folder_path, page.number))
         pix = page.get_pixmap()  # render page to an image
-        pix.save(".\%s\page-%i.png" % (fil, page.number))
+        pix.save(".\%s\page-%i.png" % (result_folder_path, page.number))
     return result_folder_path
 
 
@@ -115,8 +115,7 @@ def order(path):
 
 
 def write_sorted(path):
-    folder = filename(path)
-    text_path = pathlib.Path(r'.\%s\result.md' % (folder))
+    text_path = path + "result.md"
     arr = order(text_path)
     with open(text_path, "a+", encoding="utf-8") as f:
         f.truncate(0)
@@ -129,12 +128,11 @@ def write_sorted(path):
         f.close()
 
 
-def text2file(str_arr, pdf_path, title):
+def text2file(str_arr, pdf_path, title, png_folder):
     if str_arr is None or len(str_arr) == 0:
         return
-    folder = filename(pdf_path)
-    path = pathlib.Path(r'.\%s\result.md' % (folder))
-    with open(path, "a+", encoding="utf-8") as f:
+    filepath = png_folder + "result.md"
+    with open(filepath, "a+", encoding="utf-8") as f:
         f.write("####")
         f.write(title)
         f.write(":")
@@ -145,4 +143,4 @@ def text2file(str_arr, pdf_path, title):
                 f.write(" ")
             f.write("\n")
         f.close()
-    return path
+    return filepath
